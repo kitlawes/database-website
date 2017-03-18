@@ -10,3 +10,5 @@ Queries supported:
 * Amount of employees per title
 * Average salaries per year for department
 * Average salaries per year for title
+
+The database is populated with sample data from - https://dev.mysql.com/doc/employee/en/
