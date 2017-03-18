@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Database Website</title>
+    <title>Online Database</title>
 </head>
 <body>
 
-Database Website
-<br />
-<br />
+<h1>Online Database</h1>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    Name: <input type="text" name="name">
+    Department names
+    <input style="display: none;" name="query_type" value="dept_names">
     <input type="submit">
 </form>
+
 <br />
 
 <?php
@@ -30,26 +30,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Connection failed: " . mysqli_connect_error());
     }
     
-    $name = $_POST["name"];
-    $query = "SELECT * FROM employees WHERE first_name LIKE '%" . $name . "%' LIMIT 100;";
-    $result = mysqli_query($connection, $query);
-  
-    $fields = mysqli_fetch_fields($result);
-    echo "<table border=\"1\"><tr>";
-    foreach ($fields as $field) {
-        echo "<th>" . $field->name . "</th>";
-    }
-    echo "</tr>";
+    $query_type = $_POST["query_type"];
+    if ($query_type == "dept_names") {
     
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>";
+        $query = "SELECT dept_name FROM departments;";
+        $result = mysqli_query($connection, $query);
+      
+        $fields = mysqli_fetch_fields($result);
+        echo "<table border=\"1\"><tr>";
         foreach ($fields as $field) {
-            echo "<td>" . $row[$field->name] . "</td>";
+            echo "<th>" . $field->name . "</th>";
         }
         echo "</tr>";
-    }
+        
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            foreach ($fields as $field) {
+                echo "<td>" . $row[$field->name] . "</td>";
+            }
+            echo "</tr>";
+        }
+        
+        echo "</table>";
     
-    echo "</table>";
+    }
         
     mysqli_close($connection);
 
