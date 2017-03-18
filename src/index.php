@@ -9,15 +9,27 @@
 <h1>Online Database</h1>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    Department names
     <input style="display: none;" name="query_type" value="dept_names">
-    <input type="submit">
+    <input type="submit" value="Query">
+    Department names
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    Titles
     <input style="display: none;" name="query_type" value="titles">
-    <input type="submit">
+    <input type="submit" value="Query">
+    Titles
+</form>
+
+<form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+    <input style="display: none;" name="query_type" value="emps_per_dept">
+    <input type="submit" value="Query">
+    Amount of employees per department
+</form>
+
+<form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+    <input style="display: none;" name="query_type" value="emps_per_title">
+    <input type="submit" value="Query">
+    Amount of employees per title
 </form>
 
 <br />
@@ -42,6 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if ($query_type == "titles") {
         $query = "SELECT DISTINCT title FROM titles;";
+    }
+    if ($query_type == "emps_per_dept") {
+        $query = "SELECT dept_name, COUNT(*) as count FROM departments INNER JOIN dept_emp ON departments.dept_no = dept_emp.dept_no GROUP BY departments.dept_no ORDER BY count DESC;";
+    }
+    if ($query_type == "emps_per_title") {
+        $query = "SELECT title, COUNT(*) as count FROM employees INNER JOIN titles ON employees.emp_no = titles.emp_no GROUP BY titles.title ORDER BY count DESC;";
     }
     
     $result = mysqli_query($connection, $query);
