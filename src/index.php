@@ -60,6 +60,23 @@
     </select>
 </form>
 
+<form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+    <input style="display: none;" name="query_type" value="salaries_per_year_for_title">
+    <input type="submit" value="Query">
+    Average salaries per year for title
+    <select name="title">
+    
+    <?php
+        $query = "SELECT DISTINCT title FROM titles;";
+        $result = mysqli_query($connection, $query);
+        while ($row = $result->fetch_assoc()) {
+            echo "<option value=\"" . $row["title"] . "\">" . $row["title"] . "</option>";
+        }
+    ?>
+    
+    </select>
+</form>
+
 <br />
 
 <?php
@@ -89,6 +106,15 @@
             $query = "CREATE OR REPLACE VIEW salary_years AS SELECT from_year as year FROM dept_salaries UNION SELECT to_year as year FROM dept_salaries WHERE to_year <> 9999;";
             mysqli_query($connection, $query);
             $query = "SELECT dept_name, year, AVG(salary) as average_salary FROM salary_years JOIN dept_salaries ON from_year <= year AND year <= to_year GROUP BY year ORDER BY year DESC;";
+        }
+        if ($query_type == "salaries_per_year_for_title") {
+            $query = "CREATE OR REPLACE VIEW title_emp_nos AS SELECT title, emp_no FROM titles WHERE title = \"" . $_POST["title"] . "\";";
+            mysqli_query($connection, $query);
+            $query = "CREATE OR REPLACE VIEW title_salaries AS SELECT title, salary, YEAR(from_date) AS from_year, YEAR(to_date) AS to_year FROM title_emp_nos INNER JOIN salaries ON title_emp_nos.emp_no = salaries.emp_no;";
+            mysqli_query($connection, $query);
+            $query = "CREATE OR REPLACE VIEW salary_years AS SELECT from_year as year FROM title_salaries UNION SELECT to_year as year FROM title_salaries WHERE to_year <> 9999;";
+            mysqli_query($connection, $query);
+            $query = "SELECT title, year, AVG(salary) as average_salary FROM salary_years JOIN title_salaries ON from_year <= year AND year <= to_year GROUP BY year ORDER BY year DESC;";
         }
         
         $result = mysqli_query($connection, $query);
