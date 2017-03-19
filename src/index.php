@@ -50,6 +50,12 @@
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+    <input style="display: none;" name="query_type" value="salaries_per_title">
+    <input type="submit" value="Query">
+    Present average salaries per title
+</form>
+
+<form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
     <input style="display: none;" name="query_type" value="salaries_per_year_for_dept">
     <input type="submit" value="Query">
     Average salaries per year for department
@@ -108,6 +114,11 @@
             $query = "CREATE OR REPLACE VIEW present_salaries AS SELECT emp_no, salary FROM salaries WHERE to_date > CURDATE();";
             mysqli_query($connection, $query);
             $query = "SELECT dept_name, AVG(salary) as average_salary FROM dept_emp_nos JOIN present_salaries ON dept_emp_nos.emp_no = present_salaries.emp_no GROUP BY dept_name ORDER BY average_salary DESC;";
+        }
+        if ($query_type == "salaries_per_title") {
+            $query = "CREATE OR REPLACE VIEW present_salaries AS SELECT emp_no, salary FROM salaries WHERE to_date > CURDATE();";
+            mysqli_query($connection, $query);
+            $query = "SELECT title, AVG(salary) as average_salary FROM titles JOIN present_salaries ON titles.emp_no = present_salaries.emp_no GROUP BY title ORDER BY average_salary DESC;";
         }
         if ($query_type == "salaries_per_year_for_dept") {
             $query = "CREATE OR REPLACE VIEW department AS SELECT * FROM departments WHERE dept_name = \"" . $_POST["dept_name"] . "\";";

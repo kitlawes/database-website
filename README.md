@@ -9,6 +9,7 @@ Queries supported:
 * Amount of employees per department
 * Amount of employees per title
 * Present average salaries per department
+* Present average salaries per title
 * Average salaries per year for department
 * Average salaries per year for title
 
