@@ -56,6 +56,12 @@
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+    <input style="display: none;" name="query_type" value="employees_per_year">
+    <input type="submit" value="Query">
+    Amount of employees per year
+</form>
+
+<form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
     <input style="display: none;" name="query_type" value="average_salaries_per_year_for_department">
     <input type="submit" value="Query">
     Average salaries per year for department
@@ -119,6 +125,17 @@
             $query = "CREATE OR REPLACE VIEW present_salaries AS SELECT emp_no, salary FROM salaries WHERE to_date > CURDATE();";
             mysqli_query($connection, $query);
             $query = "SELECT title, AVG(salary) as average_salary FROM titles JOIN present_salaries ON titles.emp_no = present_salaries.emp_no GROUP BY title ORDER BY average_salary DESC;";
+        }
+        if ($query_type == "employees_per_year") {
+            $query = "CREATE OR REPLACE VIEW dept_emp_years AS SELECT YEAR(from_date) as year FROM dept_emp UNION SELECT YEAR(to_date) as year FROM dept_emp WHERE to_date <> \"9999-01-01\";";
+            mysqli_query($connection, $query);
+            $query = "CREATE OR REPLACE VIEW dept_emp_max_year AS SELECT MAX(year) + 1 as year FROM dept_emp_years;";
+            mysqli_query($connection, $query);
+            $query = "CREATE OR REPLACE VIEW dept_emp_years_extended AS SELECT * FROM dept_emp_years UNION SELECT * FROM dept_emp_max_year;";
+            mysqli_query($connection, $query);
+            $query = "CREATE OR REPLACE VIEW dept_emp_dates AS SELECT DATE_ADD(\"0000-01-01\", INTERVAL year YEAR) as date FROM dept_emp_years_extended;";
+            mysqli_query($connection, $query);
+            $query = "SELECT date, COUNT(*) as employees FROM dept_emp JOIN dept_emp_dates ON dept_emp.from_date <= date AND dept_emp.to_date > date GROUP BY date ORDER BY date DESC;";
         }
         if ($query_type == "average_salaries_per_year_for_department") {
             $query = "CREATE OR REPLACE VIEW department AS SELECT * FROM departments WHERE dept_name = \"" . $_POST["dept_name"] . "\";";
