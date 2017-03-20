@@ -20,7 +20,7 @@
 <h1>Online Database</h1>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="dept_names">
+    <input style="display: none;" name="query_type" value="department_names">
     <input type="submit" value="Query">
     Department names
 </form>
@@ -32,31 +32,31 @@
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="emps_per_dept">
+    <input style="display: none;" name="query_type" value="employees_per_department">
     <input type="submit" value="Query">
     Amount of employees per department
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="emps_per_title">
+    <input style="display: none;" name="query_type" value="employees_per_title">
     <input type="submit" value="Query">
     Amount of employees per title
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="salaries_per_dept">
+    <input style="display: none;" name="query_type" value="present_average_salaries_per_department">
     <input type="submit" value="Query">
     Present average salaries per department
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="salaries_per_title">
+    <input style="display: none;" name="query_type" value="present_average_salaries_per_title">
     <input type="submit" value="Query">
     Present average salaries per title
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="salaries_per_year_for_dept">
+    <input style="display: none;" name="query_type" value="average_salaries_per_year_for_department">
     <input type="submit" value="Query">
     Average salaries per year for department
     <select name="dept_name">
@@ -73,7 +73,7 @@
 </form>
 
 <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
-    <input style="display: none;" name="query_type" value="salaries_per_year_for_title">
+    <input style="display: none;" name="query_type" value="average_salaries_per_year_for_title">
     <input type="submit" value="Query">
     Average salaries per year for title
     <select name="title">
@@ -96,31 +96,31 @@
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $query_type = $_POST["query_type"];
-        if ($query_type == "dept_names") {
+        if ($query_type == "department_names") {
             $query = "SELECT dept_name FROM departments;";
         }
         if ($query_type == "titles") {
             $query = "SELECT DISTINCT title FROM titles;";
         }
-        if ($query_type == "emps_per_dept") {
+        if ($query_type == "employees_per_department") {
             $query = "SELECT dept_name, COUNT(*) as count FROM departments INNER JOIN dept_emp ON departments.dept_no = dept_emp.dept_no GROUP BY departments.dept_no ORDER BY count DESC;";
         }
-        if ($query_type == "emps_per_title") {
+        if ($query_type == "employees_per_title") {
             $query = "SELECT title, COUNT(*) as count FROM employees INNER JOIN titles ON employees.emp_no = titles.emp_no GROUP BY titles.title ORDER BY count DESC;";
         }
-        if ($query_type == "salaries_per_dept") {
+        if ($query_type == "present_average_salaries_per_department") {
             $query = "CREATE OR REPLACE VIEW dept_emp_nos AS SELECT dept_name, emp_no FROM departments INNER JOIN dept_emp ON departments.dept_no = dept_emp.dept_no;";
             mysqli_query($connection, $query);
             $query = "CREATE OR REPLACE VIEW present_salaries AS SELECT emp_no, salary FROM salaries WHERE to_date > CURDATE();";
             mysqli_query($connection, $query);
             $query = "SELECT dept_name, AVG(salary) as average_salary FROM dept_emp_nos JOIN present_salaries ON dept_emp_nos.emp_no = present_salaries.emp_no GROUP BY dept_name ORDER BY average_salary DESC;";
         }
-        if ($query_type == "salaries_per_title") {
+        if ($query_type == "present_average_salaries_per_title") {
             $query = "CREATE OR REPLACE VIEW present_salaries AS SELECT emp_no, salary FROM salaries WHERE to_date > CURDATE();";
             mysqli_query($connection, $query);
             $query = "SELECT title, AVG(salary) as average_salary FROM titles JOIN present_salaries ON titles.emp_no = present_salaries.emp_no GROUP BY title ORDER BY average_salary DESC;";
         }
-        if ($query_type == "salaries_per_year_for_dept") {
+        if ($query_type == "average_salaries_per_year_for_department") {
             $query = "CREATE OR REPLACE VIEW department AS SELECT * FROM departments WHERE dept_name = \"" . $_POST["dept_name"] . "\";";
             mysqli_query($connection, $query);
             $query = "CREATE OR REPLACE VIEW dept_emp_nos AS SELECT dept_name, emp_no FROM department INNER JOIN dept_emp ON department.dept_no = dept_emp.dept_no;";
@@ -131,7 +131,7 @@
             mysqli_query($connection, $query);
             $query = "SELECT dept_name, year, AVG(salary) as average_salary FROM salary_years JOIN dept_salaries ON from_year <= year AND year <= to_year GROUP BY year ORDER BY year DESC;";
         }
-        if ($query_type == "salaries_per_year_for_title") {
+        if ($query_type == "average_salaries_per_year_for_title") {
             $query = "CREATE OR REPLACE VIEW title_emp_nos AS SELECT title, emp_no FROM titles WHERE title = \"" . $_POST["title"] . "\";";
             mysqli_query($connection, $query);
             $query = "CREATE OR REPLACE VIEW title_salaries AS SELECT title, salary, YEAR(from_date) AS from_year, YEAR(to_date) AS to_year FROM title_emp_nos INNER JOIN salaries ON title_emp_nos.emp_no = salaries.emp_no;";
